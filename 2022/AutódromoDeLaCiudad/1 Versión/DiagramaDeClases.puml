@@ -1,0 +1,283 @@
+@startuml
+
+EquipoDeCompeticion o-- "*" Corredor
+EquipoDeCompeticion o-- "*" Tecnico
+EquipoDeCompeticion o-- "*" Integrante
+EquipoDeCompeticion o-- "*" Auto
+EquipoDeCompeticion o-- "*" Karting
+EquipoDeCompeticion o-- "*" Bicicleta
+
+class EquipoDeCompeticion{
+ -nombre: String
+ -corredores: List<Corredor>
+ -tecnicos: List<Tecnico>
+ -otrosIntegrantes: List<Integrante>
+ -autos: List<Auto>
+ -kartings: List<Karting>
+ -bicicletas: List<Bicicleta>
+}
+
+Corredor *-- Nacionalidad
+Corredor --> TipoDocumento
+Corredor --> "*" MedioDeContacto
+
+class Corredor{
+ -nacionalidad: Nacionalidad
+ -tipoDocumento: TipoDocumento
+ -numeroDocumento: String
+ -nombre: String
+ -apellido: String
+ -fechaDeNacimiento: LocalDate
+ -peso: Double
+ -mediosDeContacto: List<MedioDeContacto>
+}
+
+MedioDeContacto --> TipoMedioDeContacto
+
+class MedioDeContacto{
+ -contacto: String
+ -tipoMediodeContacto: TipoMedioDeContacto
+}
+
+enum TipoMedioDeContacto{
+ WHATSAPP
+ TELEGRAM
+ EMAIL
+ TELEFONO_FIJO
+ TELEFONO_CELULAR
+}
+
+class Nacionalidad{
+ -pais: String
+}
+
+Tecnico --> TipoDocumento
+
+class Tecnico{
+ -pathCertificacionesDeEstudios: List<String>
+ -pathCertificacionesAsociacionDeTecnicosDeCompeticion: List<String>
+ -tipoDocumento: TipoDocumento
+ -numeroDocumento: String
+ -nombre: String
+ -apellido: String
+ -fechaDeNacimiento: LocalDate
+ -peso: Double
+}
+
+Integrante --> TipoDocumento
+
+class Integrante{
+ -tipoDocumento: TipoDocumento
+ -numeroDocumento: String
+ -nombre: String
+ -apellido: String
+ -fechaDeNacimiento: LocalDate
+ -peso: Double
+}
+
+enum TipoDocumento{
+ DNI
+ LIBRETA_CIVICA
+ LIBRETA_ENROLAMIENTO
+}
+
+Auto *-- Marca
+Auto *-- Modelo
+
+class Auto{
+ -marca: Marca
+ -modelo: Modelo
+ -peso: Double
+}
+
+Karting *-- Marca
+Karting *-- Modelo
+
+class Karting{
+ -marca: Marca
+ -modelo: Modelo
+ -peso: Double
+}
+
+Bicicleta *-- Marca
+Bicicleta *-- Modelo
+Bicicleta *-- Rodado
+
+class Bicicleta{
+ -marca: Marca
+ -modelo: Modelo
+ -rodado: Rodado
+ -peso: Double
+}
+
+class Marca{
+ -nombre: String
+}
+
+class Modelo{
+ -nombre: String
+}
+
+class Rodado{
+ -nombre: String
+}
+
+VerificadorDeIdentidad *-- IAdapterRenaper
+IAdapterRenaper <|.. AdapterConcretoRenaper
+IAdapterRenaper ..> PersonaRenaper
+AdapterConcretoRenaper *-- APIRenaper
+
+class VerificadorDeIdentidad{
+ -adapterRenaper: IAdapterRenaper
+ +verificarIdentidad(PersonaRenaper): Boolean
+}
+
+interface IAdapterRenaper{
+ +verificarIdentidad(PersonaRenaper): Boolean
+}
+
+class AdapterConcretoRenaper{
+ -apiRenaper: APIRenaper
+ +verificarIdentidad(PersonaRenaper): Boolean
+}
+
+class APIRenaper{
+}
+
+class PersonaRenaper{
+ -tipoDocumento: TipoDocumento
+ -numeroDocumento: String
+ -nombre: String
+ -apellido: String
+ -fechaDeNacimiento: LocalDate
+}
+
+Competencia *-- EntidadOrganizadora
+Competencia *-- TipoDeActividad
+
+class Competencia{
+ -nombre: String
+ -fechaEnQueSeLlevaraACabo: LocalDate
+ -entidadOrganizadora: EntidadOrganizadora
+ -tipoDeActividad: TipoDeActividad
+ -equiposDeCompeticionInscriptos: List<EquipoDeCompeticion>
+}
+
+class EntidadOrganizadora{
+ -nombre: String
+}
+
+class TipoDeActividad{
+ -nombre: String
+}
+
+VerificadorDeAntecedentesPenales *-- IAdapterENA
+IAdapterENA <|.. AdapterConcretoENA
+IAdapterENA ..> PersonaENA
+AdapterConcretoENA *-- APIENA
+
+
+class VerificadorDeAntecedentesPenales{
+ -adapterENA: IAdapterENA
+ +verificarAntecedentesPenales(PersonaENA,SolicitudDeInscripcion): Boolean
+}
+
+interface IAdapterENA{
+ +verificarAntecedentesPenales(PersonaENA): Boolean
+}
+
+class AdapterConcretoENA{
+ -apiENA: APIENA
+ +verificarAntecedentesPenales(PersonaENA): Boolean
+}
+
+class APIENA{
+}
+
+class PersonaENA{
+ -tipoDocumento: TipoDocumento
+ -numeroDocumento: String
+ -nombre: String
+ -apellido: String
+ -fechaDeNacimiento: LocalDate
+}
+
+Inscriptor o-- VerificadorDeAntecedentesPenales
+Inscriptor o-- VerificadorDeAntecedentesDeTransito
+Inscriptor o-- Notificador
+Inscriptor ..> Corredor
+Inscriptor ..> Competencia
+
+class Inscriptor{
+ -verificadorDeAntecedentesPenales: VerificadorDeAntecedentesPenales
+ -verificadorDeAntecedentesDeTransito: VerificadorDeAntecedentesDeTransito
+ -notificador: Notificador
+ +inscribir(Corredor,Competencia): void
+}
+
+class VerificadorDeAntecedentesDeTransito{
+ -repositorioENA: RepositorioENA
+ +verificarAntecedentesDeTransito(PersonaTransito,SolicitudDeInscripcion): Boolean
+}
+
+SolicitudDeInscripcion o-- Corredor
+SolicitudDeInscripcion o-- Competencia
+SolicitudDeInscripcion --> EstadoSolicitud
+SolicitudDeInscripcion --> "*" MotivoRechazo
+
+class SolicitudDeInscripcion{
+ -corredor: Corredor
+ -competencia: Competencia
+ -fechaYHoraSolicitoInscripcion: LocalDate
+ -fechaYHoraResultadoInscripcion: LocalDate
+ -estadoSolicitud: EstadoSolicitud
+ -motivosRechazo: List<MotivoRechazo>
+}
+
+enum EstadoSolicitud{
+ ACEPTADA
+ PENDIENTE
+ RECHAZADA
+}
+
+enum MotivoRechazo{
+ ANTECEDENTES_PENALES
+ ANTECEDENTES_TRANSITO
+}
+
+Notificador o-- IAdapterNotificador
+IAdapterNotificador ..> Mensaje
+
+class Notificador{
+ -adapterNotificador: IAdapterNotificador
+ +notificar(String receptor,Mensaje): void
+}
+
+interface IAdapterNotificador{
+ +notificar(String receptor,Mensaje): void
+}
+
+class Mensaje{
+ -asunto: String
+ -cuerpo: String
+ -emisor: String
+ -receptor: String
+ -fechaYHoraEnvio: LocalDateTime
+}
+
+GeneradorDeMensaje ..> Mensaje
+
+class GeneradorDeMensaje{
+ +generarMensajeInscripcionAceptada(SolicitudDeInscripcion): Mensaje
+ +generarMensajeInscripcionRechazada(SolicitudDeInscripcion): Mensaje
+ +generarMensajeUbicacionesAsignadas(Competencia,Corredor,String ubicaciones): Mensaje
+}
+
+AsignadorDeEspacios ..> Notificador
+
+class AsignadorDeEspacios{
+ -notificador: Notificador
+ +asignarEspacio(Corredor,String mapa): List<String>
+}
+
+@enduml

@@ -1,0 +1,43 @@
+Para la clase EquipoDeCompeticion se decidió tener una lista de corredores, técnicos y otros integrantes para ya tenerlos diferenciados en lugar de tratarlos polimórficamente a través de una posible clase abstracta o interface Integrante. De esta manera, en caso de la interface, se evita forzar un polimorfismo innecesario y en caso de la herencia:
+- se reduce el acoplamiento entre ellas y la posible clase padre
+- se evita que no sean extensibles en tiempo de ejecución (y se logra que sí lo sean al ser clases concretas).
+- se evita forzar la herencia dado que no existe diferencia de comportamiento entre las clases hijas.
+
+Esto mismo es válido para el modelado de autos, kartings y bicicletas en la clase EquipoDeCompeticion.
+
+La clase Integrante representa las "otras personas" que pueden integrar el equipo.
+
+Se modeló el TipoDocumento como un enum en vez de clase concreta dado que no es necesario que sea extensible en tiempo de ejecución y se evita el problema de inconsistencia de datos.
+
+Se modeló la Nacionalidad como clase concreta para no tener un enum con 250 entradas aproximadamente. De todas maneras, esto último hubiera sido válido dado que no es necesario que sea extensible en tiempo de ejecución y se evita el problema de inconsistencia de datos.
+
+Se modelaron las clases Marca, Modelo y Rodado como clases concretas para que sean extensibles en tiempo de ejecución y para lograr que, por ejemplo, una misma marca pueda ser referenciada por varios autos y kartings al mismo tiempo.
+
+El método verificarIdentidad() del VerificadorDeIdentidad recibe por parámetro la clase PersonaRenaper para evitar el code smell de parámetros largos. De esta manera, la firma del método jamás se rompe sin importar si en un futuro el Renaper exige atributos distintos a los actuales. Además, el enunciado no aclara cuáles deberían ser los parámetros que la API del Renaper necesita para realizar la verificación por lo que puse los que me parecían que tenían más sentido (tampoco se sabe qué tipo de dato devuelve). Por este motivo, se dejó a la clase APIRenaper vacía cuando realmente debería tener por lo menos un método.
+También se recibe PersonaRenaper por inyección de dependencia para permitir validar la identidad de cualquier persona, sin importar si son o no corredores.
+
+Para la verificación de identidad, decidí utilizar el patrón Adapter para bajar el acoplamiento con la APIRenaper. De esta manera, si en un futuro la API quedase deprecada, sería fácilmente reemplazable por otra clase que implemente la interface IAdapterRenaper. Además, el patrón nos brinda:
+- Mayor mantenibilidad debido al nulo acoplamiento entre el VerificadorDeIdentidad y la APIRenaper.
+- Mayor cohesión de la clase VerificadorDeIdentidad debido a la delegación de cierto comportamiento en el adapter.
+- Mayor facilidad de testeo ya que se podría implementar un mock de AdapterConcretoRenaper.
+
+También soluciona/evita de forma directa los siguientes code smells:
+- Herencia rechazada.
+- Clases alternativas con diferentes interfaces.
+- Clase de biblioteca incompleta.
+
+Esto mismo es válido para la verificación de antecedentes penales y la notificación de mensajes.
+
+En caso de ser necesario, se podrían agregar clases Mappers para la conversión de tipos de dato al momento de comunicarse con las APIs ya sea para el envío o recepción de datos.
+
+La clase EntidadOrganizadora fue modelada como clase concreta dado que el enunciado no aclara si debería ser extensible en tiempo de ejecución.
+
+La clase TipoDeActividad fue modelada como clase concreta dado que el enunciado aclara que pueden incorporarse nuevos tipos de actividad en el futuro, por lo que debería ser extensible en tiempo de ejecución. De esta manera, se logra el dinamismo pedido.
+
+Se modeló la clase SolicitudDeInscripcion para tener una mayor trazabilidad de las inscripciones.
+
+Para la inscripción a una competencia, la clase Inscriptor recibe por inyección de dependencia a las clases VerificadorDeAntecedentesPenales, VerificadorDeAntecedentesDeTransito, Notificador, Corredor y Competencia, logrando una mayor cohesión y menor acoplamiento con estas clases (además de evitar una clase Dios). Esta clase llama al builder crearSolicitudDeInscripcion() que es un método estático de la clase SolicitudDeInscripcion que se encarga de su instanciación. Además, el Instanciador delega la verificacion de antecedentes llamando a las clases VerificadorDeAntecedentesPenales y VerificadorDeAntecedentesDeTransito. En caso de tener antecedentes penales, el VerificadorDeAntecedentesPenales settea el estadoSolicitud de la SolicitudDeInscripcion en RECHAZADA, la fechaYHoraResultadoInscripcion y agrega ANTECEDENTES_PENALES a la lista de motivosRechazo. El VerificadorDeAntecedentesDeTransito realiza acciones muy similares a las recién descriptas.
+
+Se modeló la clase Mensaje para tener una mayor trazabilidad de los mensajes enviados.
+
+Para mayor cohesión y menor acoplamiento, se modeló la clase GeneradorDeMensaje. De esta manera, también se evita que el Notificador quede como una clase Dios.
