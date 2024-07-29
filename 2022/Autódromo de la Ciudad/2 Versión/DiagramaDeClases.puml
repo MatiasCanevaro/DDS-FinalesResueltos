@@ -1,0 +1,262 @@
+@startuml
+
+EquipoDeCompeticion o-- "*" Participante
+EquipoDeCompeticion o-- "*" Vehiculo
+
+class EquipoDeCompeticion{
+ -nombre: String
+ -participantes: List<Participante>
+ -vehiculos: List<Vehiculo>
+}
+
+Participante --> TipoParticipante
+Participante o-- Persona
+
+class Participante{
+ -tipoParticipante: TipoParticipante
+ -persona: Persona
+}
+
+enum TipoParticipante{
+ CORREDOR
+ TECNICO
+ OTRO
+}
+
+class Persona{
+ -tipoDocumento: TipoDocumento
+ -numeroDocumento: String
+ -nombre: String
+ -apellido: String
+ -fechaDeNacimiento: LocalDate
+ -peso: Double
+ -identidadVerificada: Boolean
+ -mediosDeContacto: List<MedioDeContacto>
+ -pathCertificacionesDeEstudios: List<String>
+ -pathCertificacionesAsociacionDeTecnicosDeCompeticion: List<String>
+}
+
+Participante *-- Nacionalidad
+Participante --> TipoDocumento
+Participante --> "*" MedioDeContacto
+
+class Participante{
+ -nacionalidad: Nacionalidad
+ -participante: Participante
+}
+
+MedioDeContacto --> TipoMedioDeContacto
+
+class MedioDeContacto{
+ -contacto: String
+ -tipoMediodeContacto: TipoMedioDeContacto
+}
+
+enum TipoMedioDeContacto{
+ WHATSAPP
+ TELEGRAM
+ EMAIL
+ TELEFONO_FIJO
+ TELEFONO_CELULAR
+}
+
+class Nacionalidad{
+ -pais: String
+}
+
+enum TipoDocumento{
+ DNI
+ LIBRETA_CIVICA
+ LIBRETA_ENROLAMIENTO
+}
+
+Vehiculo *-- Marca
+Vehiculo *-- Modelo
+Vehiculo *-- Rodado
+Vehiculo --> TipoVehiculo
+
+class Vehiculo{
+ -marca: Marca
+ -modelo: Modelo
+ -rodado: Rodado
+ -peso: Double
+ -tipoVehiculo: TipoVehiculo
+}
+
+class Marca{
+ -nombre: String
+}
+
+class Modelo{
+ -nombre: String
+}
+
+class Rodado{
+ -nombre: String
+}
+
+enum TipoVehiculo{
+ AUTO
+ KARTING
+ BICICLETA
+}
+
+VerificadorDeIdentidad *-- IAdapterRenaper
+IAdapterRenaper <|.. AdapterConcretoRenaper
+IAdapterRenaper ..> Persona
+AdapterConcretoRenaper *-- APIRenaper
+
+IAdapterRenaper ..> Participante
+
+class VerificadorDeIdentidad{
+ -adapterRenaper: IAdapterRenaper
+ +verificarIdentidad(Persona): Boolean
+}
+
+interface IAdapterRenaper{
+ +verificarIdentidad(Persona): Boolean
+}
+
+class AdapterConcretoRenaper{
+ -apiRenaper: APIRenaper
+ +verificarIdentidad(Persona): Boolean
+}
+
+class APIRenaper{
+}
+
+Competencia *-- EntidadOrganizadora
+Competencia *-- TipoDeActividad
+
+class Competencia{
+ -nombre: String
+ -fechaEnQueSeLlevaraACabo: LocalDate
+ -entidadOrganizadora: EntidadOrganizadora
+ -tipoDeActividad: TipoDeActividad
+ -equiposDeCompeticionInscriptos: List<EquipoDeCompeticion>
+}
+
+class EntidadOrganizadora{
+ -nombre: String
+}
+
+class TipoDeActividad{
+ -nombre: String
+}
+
+VerificadorDeAntecedentesPenales *-- IAdapterENA
+IAdapterENA <|.. AdapterConcretoENA
+IAdapterENA ..> Persona
+AdapterConcretoENA *-- APIENA
+
+
+class VerificadorDeAntecedentesPenales{
+ -adapterENA: IAdapterENA
+ +verificarAntecedentesPenales(Persona,SolicitudDeInscripcion): Boolean
+}
+
+interface IAdapterENA{
+ +verificarAntecedentesPenales(Persona): Boolean
+}
+
+class AdapterConcretoENA{
+ -apiENA: APIENA
+ +verificarAntecedentesPenales(Persona): Boolean
+}
+
+class APIENA{
+}
+
+Inscriptor o-- VerificadorDeAntecedentesPenales
+Inscriptor o-- VerificadorDeAntecedentesDeTransito
+Inscriptor o-- Notificador
+Inscriptor ..> Participante
+Inscriptor ..> Competencia
+
+class Inscriptor{
+ -verificadorDeAntecedentesPenales: VerificadorDeAntecedentesPenales
+ -verificadorDeAntecedentesDeTransito: VerificadorDeAntecedentesDeTransito
+ -notificador: Notificador
+ +inscribir(EquipoDeCompeticion,Competencia): void
+}
+
+class VerificadorDeAntecedentesDeTransito{
+ -repositorioENA: RepositorioENA
+ +verificarAntecedentesDeTransito(Persona,SolicitudDeInscripcion): Boolean
+}
+
+SolicitudDeInscripcion o-- Participante
+SolicitudDeInscripcion o-- Competencia
+SolicitudDeInscripcion --> EstadoSolicitud
+
+class SolicitudDeInscripcion{
+ -participante: Participante
+ -competencia: Competencia
+ -fechaYHoraSolicitoInscripcion: LocalDate
+ -fechaYHoraResultadoInscripcion: LocalDate
+ -estadoSolicitud: EstadoSolicitud
+ -antecedentesPenalesVerificados: Boolean
+ -antecedentesDeTransitoVerificados: Boolean
+}
+
+enum EstadoSolicitud{
+ ACEPTADA
+ PENDIENTE
+ RECHAZADA
+}
+
+Notificador o-- IAdapterNotificador
+IAdapterNotificador ..> Mensaje
+
+class Notificador{
+ -adapterNotificador: IAdapterNotificador
+ +notificar(String receptor,Mensaje): void
+}
+
+interface IAdapterNotificador{
+ +notificar(String receptor,Mensaje): void
+}
+
+class Mensaje{
+ -asunto: String
+ -cuerpo: String
+ -emisor: String
+ -receptor: String
+ -fechaYHoraEnvio: LocalDateTime
+}
+
+GeneradorDeMensaje ..> Mensaje
+
+class GeneradorDeMensaje{
+ +generarMensajeInscripcionAceptada(SolicitudDeInscripcion): Mensaje
+ +generarMensajeInscripcionRechazada(SolicitudDeInscripcion): Mensaje
+ +generarMensajeEspaciosAsignados(Competencia,EquipoDeCompeticion,List<AsignacionDeEspacio>): Mensaje
+}
+
+AsignadorDeEspacios ..> Notificador
+
+class AsignadorDeEspacios{
+ -notificador: Notificador
+ +asignarEspacio(EquipoDeCompeticion,String mapa): List<AsignacionDeEspacio>
+}
+
+AsignacionDeEspacio *-- Espacio
+AsignacionDeEspacio o-- EquipoDeCompeticion
+
+class AsignacionDeEspacio{
+ -espacio: Espacio
+ -equipoDeCompeticion: EquipoDeCompeticion
+}
+
+Espacio o-- Autodromo
+
+class Espacio{
+ -info: String
+ -autodromo: Autodromo
+}
+
+class Autodromo{
+ -nombre: String
+}
+
+@enduml
