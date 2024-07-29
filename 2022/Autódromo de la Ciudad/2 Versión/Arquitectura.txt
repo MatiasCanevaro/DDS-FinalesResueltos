@@ -1,5 +1,0 @@
-Para el contexto y requerimientos previstos, sugeriría considerar los atributos de calidad: interoperabilidad y disponibilidad.
-
-Interoperabilidad dado que es extremadamente prioritario que el sistema pueda intercambiar información y utilizar la información intercambiada con la API REST.
-
-Disponibilidad dado que es primordial que el sistema se encuentre operativo y accesible para su uso, principalmente en días de alto tráfico como pueden ser los cercanos a fechas límite.

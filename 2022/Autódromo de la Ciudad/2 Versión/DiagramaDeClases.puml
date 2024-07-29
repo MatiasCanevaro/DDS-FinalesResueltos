@@ -23,7 +23,12 @@ enum TipoParticipante{
  OTRO
 }
 
+Persona *-- Nacionalidad
+Persona --> TipoDocumento
+Persona *-- "*" MedioDeContacto
+
 class Persona{
+ -nacionalidad: Nacionalidad
  -tipoDocumento: TipoDocumento
  -numeroDocumento: String
  -nombre: String
@@ -34,15 +39,6 @@ class Persona{
  -mediosDeContacto: List<MedioDeContacto>
  -pathCertificacionesDeEstudios: List<String>
  -pathCertificacionesAsociacionDeTecnicosDeCompeticion: List<String>
-}
-
-Participante *-- Nacionalidad
-Participante --> TipoDocumento
-Participante --> "*" MedioDeContacto
-
-class Participante{
- -nacionalidad: Nacionalidad
- -participante: Participante
 }
 
 MedioDeContacto --> TipoMedioDeContacto
