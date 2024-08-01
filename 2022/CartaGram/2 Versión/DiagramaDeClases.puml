@@ -1,0 +1,99 @@
+@startuml
+
+class Persona{
+ -nombre: String
+ -descripcion: String
+ +recibirMensaje(Mensaje mensaje): void
+}
+
+class Bot{
+ -nombre: String
+ -comandos: List<Comando>
+ +procesarTexto(String texto): void
+ +recibirMensaje(Mensaje mensaje): void
+}
+
+class Comando{
+ -nombre: String
+ -acciones: List<Accion>
+ +ejecutarAcciones(List<String> parametros): String
+}
+
+interface Accion{
+ +ejecutar(List<String> parametros): String
+}
+
+class Chat{
+ -personas: List<Persona>
+ -grupo: Grupo
+ -mensajesEnviados: List<Mensaje>
+}
+
+class Grupo{
+ -nombre: String
+ -descripcion: String
+ -usuarios: List<Persona>
+ -bots: List<Bot>
+ -administradores: List<Persona>
+ -creador: Persona
+ -fechaYHoraCreacion: LocalDateTime
+ -mensajesEnviados: List<Mensaje>
+ +agregarUsuario(Persona): void
+ +quitarUsuario(Persona): void
+ +agregarBot(Bot): void
+ +quitarBot(Bot): void
+ +agregarAdministrador(Persona): void
+ +quitarAdministrador(Persona): void
+ +cambiarNombreGrupo(String nuevoNombre): void
+ +cambiarDescripcionGrupo(String nuevaDescripcion): void
+ +obtenerMensajesAnteriores(Persona): List<Mensaje>
+}
+
+class Mensaje{
+ -texto: String
+ -personaEmisor: Persona
+ -personaReceptor: Persona
+ -botEmisor: Bot
+ -botReceptor: Bot
+ -fechaYHoraFueEnviado: LocalDateTime
+ -fueEnviado: Boolean
+ -fechaYHoraFueRecibido: LocalDateTime
+ -fueRecibido: Boolean
+ -fechaYHoraFueLeido: LocalDateTime
+ -fueLeido: Boolean
+ -fechaYHoraFueRegistradoEnElServidorCentral: LocalDateTime
+ -fueRegistradoEnElServidorCentral: Boolean
+ -archivosAdjuntos: List<Archivo>
+}
+
+class Archivo{
+ -nombre: String
+ -contenido: String
+ -extension: Extension
+}
+
+class Extension{
+ -nombre: String
+}
+
+interface INotificador{
+ +notificar(Mensaje,Persona): void
+ +notificar(Mensaje,Bot): void
+}
+
+class Notificador{
+ -adapterPersona: IAdapterPersona
+ -adapterBot: IAdapterBot
+ +notificar(Mensaje,Persona): void
+ +notificar(Mensaje,Bot): void
+}
+
+interface IAdapterPersona{
+ +notificar(Mensaje,Persona): void
+}
+
+interface IAdapterBot{
+ +notificar(Mensaje,Bot): void
+}
+
+@enduml

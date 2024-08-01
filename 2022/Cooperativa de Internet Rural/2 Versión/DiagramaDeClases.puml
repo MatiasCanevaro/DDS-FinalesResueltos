@@ -1,0 +1,152 @@
+@startuml
+
+class Cliente{
+ -nombre: String
+ -apellido: String
+ -numeroDocumento: String
+ -tipoDocumento: TipoDocumento
+ -mediosDeContacto: List<MedioDeContacto>
+ -direcciones: List<Direccion>
+ -presupuestos: List<Presupuesto>
+ -prestacionesServicio: List<PrestacionServicio>
+ -coeficienteRecargo: Double
+ +tieneMasDe3PresupuestosRechazadosEnLaCoordenada(Coordenada): Boolean
+ +tieneAlMenos2ServiciosContratados(): Boolean
+}
+
+enum TipoDocumento{
+ DNI
+ LIBRETA_ENROLAMIENTO
+ LIBRETA_CIVICA
+}
+
+class MedioDeContacto{
+ -valor: String
+ -tipoMedioDeContacto: TipoMedioDeContacto
+}
+
+enum TipoMedioDeContacto{
+ EMAIL
+ TELEFONO
+}
+
+class Direccion{
+ -calle: String
+ -altura: String
+ -piso: String
+ -codigoPostal: String
+ -coordenada: Coordenada
+}
+
+class Coordenada{
+ -latitud: String
+ -longitud: String
+}
+
+class Tarifa{
+ -fechaYHoraInicio: LocalDateTime
+ -fechaYHoraFin: LocalDateTime
+ -costoDeInstalacion: Double
+}
+
+class Servicio{
+ -nombre: String
+ -precioBase: Double
+ -tipoServicio: TipoServicio
+ -tarifas: List<Tarifa>
+}
+
+class TipoServicio{
+ -nombre: String
+ -mbps: String
+ -simetria: Simetria
+}
+
+enum Simetria{
+ SIMETRICO
+ ASIMETRICO
+}
+
+class Repetidor{
+ -nombre: String
+ -direccionFisicaMAC: String
+ -radioDeAlcance: Double
+ -coordenada: Coordenada
+ -cantMaxConexiones: Integer
+ -cantConexionesActuales: Integer
+ +admitirConexion(): void
+}
+
+class PrestacionServicio{
+ -cliente: Cliente
+ -direccion: Direccion
+ -servicio: Servicio
+ -repetidor: Repetidor
+ -fechaYHoraInicio: LocalDateTime
+ -fechaYHoraFin: LocalDateTime
+ +calcularAbonoMensual(CalculadoraDistancia,CalculadoraAltura): Double
+}
+
+class CalculadoraDistancia{
+ -adapterDistancia: IAdapterDistancia
+ +calcularDistancia(Coordenada,Coordenada): Double
+}
+
+interface IAdapterDistancia{
+ +calcularDistancia(Coordenada,Coordenada): Double
+}
+
+class AdapterConcretoDistancia{
+ -distanceMatrixAPI: DistanceMatrixAPI
+ +calcularDistancia(Coordenada,Coordenada): Double
+}
+
+class DistanceMatrixAPI{
+ +calcularDistancia(String latitud1,String longitud1,String latitud2,String longitud2): Double
+}
+
+class CalculadoraAltura{
+ -adapterAltura: IAdapterAltura
+ +calcularAltura(Coordenada,Double radio1,Coordenada,Double radio2): Double
+}
+
+interface IAdapterAltura{
+ +calcularAltura(Coordenada,Double radio1,Coordenada,Double radio2): Double
+}
+
+class AdapterConcretoDistancia{
+ -utnGEOHMAX: utnGEOHMAX
+ +calcularAltura(Coordenada,Double radio1,Coordenada,Double radio2): Double
+}
+
+class UTNGEOHMAX{
+ +calcularAltura(String latitud1,String longitud1,Double radio1,String latitud2,String longitud2,Double radio2): Double
+}
+
+class Presupuesto{
+ -estados: List<EstadoPresupuesto>
+ -cliente: Cliente
+ -direccion: Direccion
+ -servicio: Servicio
+ -fechaYHoraEmision: LocalDateTime
+ -costoDeInstalacion: Double
+ -abonoMensualAplicado: Double
+ -recargoPorMultiplesRechazos: Double
+ -bonificacionEspecial: Double
+ +calcularPresupuestoTotal(Cliente,Presupuesto): Double
+}
+
+class EstadoPresupuesto{
+ -tipoEstado: TipoEstado
+ -fechaYHoraLlegoAEsteEstado: LocalDateTime
+ -fechaYHoraDejoEsteEstado: LocalDateTime
+}
+
+enum TipoEstado{
+ ACTIVO
+ VENCIDO
+ APROBADO
+ RECHAZADO
+}
+
+@enduml
