@@ -1,0 +1,175 @@
+@startuml
+
+class DispositivoDeCatalogo{
+ -marca: Marca
+ -categoria: Categoria
+ -peso: Double
+ -precioDeAlquiler: Double
+ -fechaYHoraPublicado: LocalDateTime
+ -fechaYHoraDejoDeEstarPublicado: LocalDateTime
+}
+
+class Marca{
+ -nombre: String
+ -modelo: String
+}
+
+class Categoria{
+ -nombre: String
+ -dispositivosDeCatalogo: List<DispositivoDeCatalogo>
+}
+
+class DispositivoConcreto{
+ -nombre: String
+ -numeroDeSerie: String
+ -fechaDeAlta: LocalDate
+ -estaActivo: Boolean
+ -estaAlquilado: Boolean
+ -dispositivoDeCatalogo: DispositivoDeCatalogo
+ +colocarComoInactivo(): void
+}
+
+class Posicion{
+ -latitud: String
+ -longitud: String
+}
+
+class Cliente{
+ -nombre: String
+ -apellido: String
+ -cuit: String
+ -tipoPersona: TipoPersona
+ -condicionAnteIva: CondicionAnteIva
+ -mediosDeContacto: List<MedioDeContacto>
+ -ordenesDeAlquiler: List<OrdenDeAlquiler>
+}
+
+enum TipoPersona{
+ FISICA
+ JURIDICA
+}
+
+enum CondicionAnteIva{
+ RESPONSABLE INSCRIPTO
+ EXENTO
+}
+
+class MedioDeContacto{
+ -valor: String
+ -tipoMedioDeContacto: TipoMedioDeContacto
+}
+
+enum TipoMedioDeContacto{
+ EMAIL
+ TELEFONO
+ WHATSAPP
+}
+
+class Catalogo{
+ -nombre: String
+ -categorias: List<Categoria>
+}
+
+class SolicitudDeAlquiler{
+ -cliente: Cliente
+ -items: List <ItemSolicitud>
+ -fechaYHoraAlta: LocalDateTime
+ -fechaInicio: LocalDate
+ -fechaFin: LocalDate
+ -lugarDeUso: Direccion
+ -formaDeRetiro: FormaDeRetiro
+ -localDondeRealizaraElRetiro: Direccion
+ -lugarDeEnvio: Direccion
+}
+
+class ItemSolicitud{
+ -categoria: Categoria
+ -cantidad: Integer
+}
+
+class Direccion{
+ -calle: String
+ -altura: String
+ -piso: String
+ -codigoPostal: String
+ -posicion: Posicion
+}
+
+enum FormaDeRetiro{
+ POR LOCAL
+ ENVIO
+}
+
+class ProcesadorSolicitudDeAlquiler{
+ -notificador: Notificador
+ -enviadorSolicitud: EnviadorSolicitud
+ +procesar(List<SolicitudDeAlquiler>): void
+}
+
+class EnviadorSolicitud{
+ -adapterProveedor: AdapterProveedor
+ +enviarSolicitud(SolicitudDeAlquiler): void
+}
+
+interface AdapterProveedor{
+ +enviarSolicitud(SolicitudDeAlquiler): void
+}
+
+class OrdenDeAlquiler{
+ -dispositivosConcretos: List<DispositivoConcreto>
+ -solicitudDeAlquiler: SolicitudDeAlquiler
+ -estadoOrden: EstadoOrden
+ -cambiosDeEstado: List<CambioDeEstado>
+ -fechaYHoraGenerada: LocalDateTime
+}
+
+enum EstadoOrden{
+ PENDIENTE
+ GENERADA
+ LISTA_PARA_RETIRAR
+ ENTREGADA
+ DEVUELTA
+}
+
+class CambioDeEstado{
+ -estado: EstadoOrden
+ -fechaYHora: LocalDateTime
+}
+
+class Notificador{
+ -adapter: IAdapterNotificador
+ +notificar(Mensaje,String receptor): void
+}
+
+interface INotificador{
+ +notificar(Mensaje,String receptor): void
+}
+
+class AdapterConcreto{
+ -apiAdaptada: APIAdaptada
+ +notificar(Mensaje,String receptor): void
+}
+
+class APIAdaptada{
+ +notificar(String mensaje,String receptor): void
+}
+
+class ReceptorPosicion{
+ -gestionadorDeAlerta: GestionadorDeAlerta
+ -dispositivoConcreto: DispositivoConcreto
+ +recibirPosicion(Posicion): void
+}
+
+class GestionadorDeAlerta{
+ -radioMaxAceptableEnKM: Double
+ +gestionarAlerta(Posicion,DispositivoConcreto): Boolean
+}
+
+class AlertaFueraDeRango{
+ -ordenDeAlquiler: OrdenDeAlquiler
+ -dispositivoConcreto: DispositivoConcreto
+ -posicion: Posicion
+ -fechaYHora: LocalDateTime
+}
+
+@enduml

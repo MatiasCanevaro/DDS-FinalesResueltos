@@ -1,0 +1,192 @@
+@startuml
+
+class Persona{
+ -nombre: String
+ -apellido: String
+ -medioDeContacto: MedioDeContacto
+ -fechaDeNacimiento: LocalDateTime
+ -gastos: List<Gasto>
+ -fondos: List<Fondo>
+ -estadoPersona: EstadoPersona
+ -cambiosDeEstado: List<CambioDeEstado>
+ -marcarGastoComoPotencialmenteEnVano: Boolean
+ -marcarGastoComoPotencialmenteDudoso: Boolean
+ -notificador: Notificador
+ +registrarGasto(): void
+}
+
+class CambioDeEstado{
+ -fechaYHoraCambio: LocalDateTime
+ -estadoPrevio: EstadoPersona
+ -estadoActual: EstadoPersona
+}
+
+class CronEnPlenoGasto{
+ -cantidadDeGastosSeguidos: Integer
+ -periodoMaximoEnMinutos: Double
+ -estadoPersona: EstadoPersona
+ +evaluarActivacion(Persona): void
+}
+
+class CronDerrochando{
+ -cantidadDeGastosSeguidos: Integer
+ -periodoMaximoEnMinutos: Double
+ -estadoPersona: EstadoPersona
+ -notificador: Notificador
+ +evaluarActivacion(Persona): void
+}
+
+class CronDudosamenteCompulsivo{
+ -cantidadDeGastosSeguidos: Integer
+ -periodoMaximoEnMinutos: Double
+ -montoMaximoEnPesos: Double
+ -estadoPersona: EstadoPersona
+ +evaluarActivacion(Persona): void
+}
+
+class CronNoEstaGastando{
+ -cantidadDeGastosSeguidos: Integer
+ -periodoMaximoEnMinutos: Double
+ -estadoPersona: EstadoPersona
+ +evaluarActivacion(Persona): void
+}
+
+enum EstadoGasto{
+ POTENCIALMENTE EN VANO
+ POTENCIALMENTE DUDOSO
+}
+
+class MedioDeContacto{
+ -valor: String
+ -tipoMedioDeContacto: TipoMedioDeContacto
+}
+
+enum TipoMedioDeContacto{
+ EMAIL
+ WHATSAPP
+}
+
+class Gasto{
+ -fechaRegistro: LocalDate
+ -fechaYHoraRegistro: LocalDateTime
+ -monto: Double
+ -descripcion: Descripcion
+ -categoria: Categoria
+ -comercio: Comercio
+ -formaDeRegistro: FormaDeRegistro
+}
+
+enum Descripcion{
+}
+
+enum FormaDeRegistro{
+ AUTOMATICA
+ MANUAL
+}
+
+class Comercio{
+ -nombre: String
+ -pais: Pais
+ -personaQueLoCargo: Persona
+ -fechaYHoraRegistro: LocalDateTime
+ -categoria: Categoria
+}
+
+class Pais{
+ -nombre: String
+ -provincia: String
+}
+
+class Provincia{
+ -nombre: String
+}
+
+class Categoria{
+ -nombre: String
+ -categoria: Categoria
+ -gastos: List<Gasto>
+ +obtenerCantidadDeGastos(): Double
+}
+
+class Categorizador{
+ -adapter: IAdapterCategorizador
+ +categorizar(Descripcion): Integer
+}
+
+class IAdapterCategorizador{
+ +categorizar(Descripcion): Integer
+}
+
+class AdapterConcretoCategorizador{
+ -apiCategorizador: APICategorizador
+ +categorizar(Descripcion): Integer
+}
+
+class APICategorizador{
+ +categorizar(Descripcion): Integer
+}
+
+class RegistroDeGastos{
+ +registrarGastos(InfoAPIREST): void
+}
+
+class InfoAPIREST{
+ -nombreDelAplicativo: String
+ -gastos: List<GastoAPIREST>
+}
+
+class GastoAPIREST{
+ -monto: Double
+ -descripcion: Descripcion
+ -categoria: Categoria
+ -comercio: Comercio
+}
+
+class Presupuesto{
+ -fechaInicioPeriodo: LocalDate
+ -fechaFinPeriodo: LocalDate
+ -topeMaximoDeFondos: Double
+ -categoria: Categoria
+}
+
+class AlertaDeConsumo{
+ -nombre: String
+ -categorias: List<Categoria>
+ -montoMaximoEnPesos: Double
+ -periodoMaximoEnMinutos: Double
+ -persona: Persona
+ -potenciadorEnPlenoGasto: Double
+ +evaluarActivacion(): void
+}
+
+class AlertaSobrePresupuesto{
+ -nombre: String
+ -presupuesto: Presupuesto
+ -categoria: Categoria
+ +evaluarActivacion(): void
+}
+
+class Fondo{
+ -fechaRegistro: LocalDate
+ -monto: Double
+ -descripcion: String
+ -estadoPersona: EstadoPersona
+}
+
+class GeneradorDeResumen{
+ +generarResumen(Persona,fechaInicio,fechaFin): Resumen
+ +obtenerTopXCategoriasConMayorCantidadDeGastos(Integer cantidadDeCategorias): List<Categoria>
+ +obtenerUltimasXCategoriasQueLLevaronAConsiderarALaPersonaEnEstado(Persona,EstadoPersona,Integer cantidadDeCategorias): List<Categoria>
+ +obtenerTopXCategoriasConMayorCantidadDeGastosIngresadosDesdeOtrasAplicaciones(Integer cantidadDeCategorias): List<Categoria>
+ +obtenerCantidadDeFondosGastadosEnEstado(Persona,EstadoPersona): Double
+}
+
+class Resumen{
+ -fechaYHoraEmision: LocalDateTime
+ -fechaInicio: LocalDate
+ -fechaFin: LocalDate
+ -persona: Persona
+ -info: String
+}
+
+@enduml
